@@ -1,24 +1,42 @@
+ <div align="center">
+
 # Incident Management — Dockerized Application
 
-A full-stack Incident Management application containerized using Docker and Docker Compose. The project demonstrates multi-container application deployment with React, Node.js, Express, PostgreSQL, persistent storage, and container health checks.
+**A Full-Stack Application Containerized with Docker**
+
+[![Docker](https://img.shields.io/badge/Docker-Containerization-2496ED?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Docker Compose](https://img.shields.io/badge/Docker%20Compose-Orchestration-2496ED?logo=docker&logoColor=white)](https://docs.docker.com/compose/)
+[![React](https://img.shields.io/badge/React-Frontend-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-Backend-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+
+</div>
+
+---
 
 ## Overview
 
-This project builds on the previous manual and automated EC2 deployment versions by introducing Docker-based containerization.
+Incident Management V3 is a full-stack application containerized using Docker and orchestrated with Docker Compose.
 
-The frontend, backend, and PostgreSQL database run as separate containers, managed through Docker Compose. Nginx serves the React application and forwards API requests to the backend service.
+The project separates the frontend, backend, and PostgreSQL database into independent containers. It demonstrates production-oriented containerization, multi-stage builds, persistent storage, health checks, development workflows, resource management, and container image security scanning.
+
+This project is the third stage of my Incident Management DevOps learning series.
 
 ## Features
 
-- Dockerized React frontend
-- Containerized Node.js and Express backend
-- PostgreSQL database container
-- Multi-container orchestration with Docker Compose
-- Persistent PostgreSQL storage using Docker volumes
-- Container health checks
+- React frontend served through Nginx
+- Node.js and Express backend
+- PostgreSQL database with persistent storage
+- Multi-container orchestration using Docker Compose
+- Separate Development and Production environments
+- Multi-stage Docker builds
+- Non-root backend container execution
+- Container health checks and service dependencies
 - Environment-based configuration
-- Docker multi-stage frontend build
-- Dedicated Dockerfiles and `.dockerignore` files
+- Docker Compose resource limits
+- Optional pgAdmin service using Compose profiles
+- Trivy vulnerability scanning
+- Optimized production images
 
 ## Technology Stack
 
@@ -28,35 +46,39 @@ The frontend, backend, and PostgreSQL database run as separate containers, manag
 | Backend | Node.js, Express.js |
 | Database | PostgreSQL 16 |
 | Web Server | Nginx |
+| Database Administration | pgAdmin |
 | Containerization | Docker |
 | Orchestration | Docker Compose |
+| Security Scanning | Trivy |
 | Base Images | Node.js Alpine, Nginx Alpine |
 | Development Environment | Linux |
 
 ## Architecture
 
-The application uses a multi-container architecture managed by Docker Compose.
+The application follows a multi-container architecture.
 
 ```text
-                 User
-                  |
-                  v
-          Frontend Container
-             Nginx :80
-                  |
-             API Requests
-                  |
-                  v
-          Backend Container
-           Express :5000
-                  |
-                  v
-          Database Container
-          PostgreSQL :5432
-                  |
-                  v
-          Persistent Volume
+                    User
+                      |
+                      v
+              Frontend Container
+                  Nginx :80
+                      |
+                 /api Requests
+                      |
+                      v
+              Backend Container
+                Express :5000
+                      |
+                      v
+              Database Container
+               PostgreSQL :5432
+                      |
+                      v
+               Persistent Volume
 ```
+
+Docker Compose manages container networking, service dependencies, health checks, and persistent storage.
 
 ## Project Structure
 
@@ -64,25 +86,42 @@ The application uses a multi-container architecture managed by Docker Compose.
 incident-management-v3/
 ├── backend/
 │   ├── src/
+│   │   ├── db.js
+│   │   └── server.js
 │   ├── Dockerfile
 │   └── .dockerignore
+│
 ├── frontend/
 │   ├── src/
 │   ├── Dockerfile
 │   ├── nginx.conf
+│   ├── vite.config.js
 │   └── .dockerignore
+│
+├── screenshots/
+│   ├── screenshot-01.png
+│   ├── screenshot-02.png
+│   ├── screenshot-03.png
+│   ├── screenshot-04.png
+│   ├── screenshot-05.png
+│   ├── screenshot-06.png
+│   ├── screenshot-07.png
+│   └── screenshot-08.png
+│
 ├── compose.yaml
-├── .env
+├── compose.dev.yaml
+├── .env.example
 ├── .gitignore
 └── README.md
 ```
 
-## Run Locally with Docker
+## Getting Started
 
 ### Prerequisites
 
 - Docker Engine
 - Docker Compose
+- Git
 
 ### 1. Clone the Repository
 
@@ -93,122 +132,121 @@ cd incident-management-v3
 
 ### 2. Configure Environment Variables
 
-Create a `.env` file in the project root:
+Create your environment file from the example:
 
-```env
-DB_NAME=incidentdb
-DB_USER=incident_user
-DB_PASSWORD=your_strong_password
+```bash
+cp .env.example .env
 ```
 
-Keep `.env` out of Git.
+Update the values in `.env` with your own credentials.
 
-### 3. Build the Docker Images
+Keep `.env` out of version control.
+
+### 3. Production Deployment
+
+Build the production images:
 
 ```bash
 docker compose build
 ```
 
-### 4. Start the Application
+Start the application:
 
 ```bash
 docker compose up -d
 ```
 
-### 5. Verify Container Status
+Check container status:
 
 ```bash
 docker compose ps
 ```
 
-All three services should become healthy.
+### 4. Development Environment
+
+Start the development environment separately:
+
+```bash
+docker compose -p incident-management-dev -f compose.dev.yaml up -d
+```
+
+The development setup uses Vite's development server, Node.js watch mode, and PostgreSQL.
+
+Access the development application:
+
+`http://localhost:5173`
+
+Stop the development environment:
+
+```bash
+docker compose -p incident-management-dev -f compose.dev.yaml down
+```
 
 ## Application Access
 
 | Service | URL |
 |---|---|
-| Frontend | http://localhost:8080 |
-| Backend Health Check | http://localhost:8080/health |
+| Production Frontend | http://localhost:8080 |
 | Incidents API | http://localhost:8080/api/incidents |
+| Development Frontend | http://localhost:5173 |
+| pgAdmin | http://localhost:5050 |
 
-## Useful Docker Commands
+The backend health check runs internally inside the backend container.
 
-View running containers:
+## Project Screenshots
+
+### Application Interface
+
+![Application Screenshot](screenshots/screenshot-01.png)
+
+### Development and Container Management
+
+![Development Screenshot](screenshots/screenshot-02.png)
+
+![Container Management Screenshot](screenshots/screenshot-03.png)
+
+### Database Administration — pgAdmin
+
+![pgAdmin Screenshot](screenshots/screenshot-04.png)
+
+![Database Screenshot](screenshots/screenshot-05.png)
+
+### Security Scanning — Trivy
+
+**Backend Image Scan**
+
+![Backend Trivy Scan](screenshots/screenshot-06.png)
+
+**Frontend Image Scan**
+
+![Frontend Trivy Scan](screenshots/screenshot-07.png)
+
+![Additional Security Scan](screenshots/screenshot-08.png)
+
+## Database Administration with pgAdmin
+
+pgAdmin is configured as an optional service using Docker Compose profiles.
+
+Start the application with pgAdmin:
 
 ```bash
-docker compose ps
+docker compose --profile tools up -d
 ```
 
-View application logs:
+Access pgAdmin:
 
-```bash
-docker compose logs -f
-```
+`http://localhost:5050`
 
-View individual service logs:
+Use the following connection settings when registering the PostgreSQL server:
 
-```bash
-docker compose logs -f backend
-```
-
-Stop the application:
-
-```bash
-docker compose down
-```
-
-Stop containers without deleting database data:
-
-```bash
-docker compose down
-```
-
-Stop containers and remove persistent database data:
-
-```bash
-docker compose down -v
-```
-
-## Containerization Highlights
-
-- Separate containers for frontend, backend, and database services.
-- Docker Compose manages service dependencies and startup order.
-- PostgreSQL data persists through a named Docker volume.
-- Health checks verify database, backend, and frontend availability.
-- Multi-stage frontend builds separate build dependencies from the production Nginx image.
-- `.dockerignore` files reduce unnecessary build context.
-- Internal Docker networking enables service-to-service communication.
-
-## What I Learned
-
-- Building custom Docker images for full-stack applications.
-- Understanding Dockerfiles and multi-stage builds.
-- Orchestrating multiple services with Docker Compose.
-- Configuring container networking and service discovery.
-- Managing persistent database storage with Docker volumes.
-- Implementing container health checks.
-- Handling environment variables and container logs.
-- Optimizing Docker build contexts.
-
-## Project Evolution
-
-This project is the third stage of the Incident Management DevOps learning series.
-
-| Version | Focus |
+| Setting | Value |
 |---|---|
-| V1 | AWS EC2 Manual Deployment |
-| V2 | Automated Deployment with Bash and Nginx |
-| V3 | Docker Containerization |
-| V4 | Monitoring and Observability |
+| Host | db |
+| Port | 5432 |
+| Database | incidentdb |
+| Username | Value of DB_USER |
+| Password | Value of DB_PASSWORD |
 
-## Author
+The pgAdmin service communicates with PostgreSQL through the internal Docker network.
 
-**Tanjim Ahmed (Tomal)**
-
-DevOps Engineer | Linux | Docker | CI/CD | AWS | Kubernetes
-
-GitHub: [@tanahmeeedsx](https://github.com/tanahmeeedsx)
-
-LinkedIn: [Tanjim Ahmed](https://linkedin.com/in/tanahmedd/)
-
-Built as a hands-on project to strengthen practical knowledge of Docker, container orchestration, and modern DevOps deployment workflows.
+## Resource
